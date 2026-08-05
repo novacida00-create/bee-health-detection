@@ -1,25 +1,14 @@
 import os
-import pymysql
-from config import DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
+import sqlite3
+
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "bee_detection.db")
 
 def get_db_connection():
-    use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
-
     try:
-        conn = pymysql.connect(
-            host=DATABASE_HOST,
-            port=DATABASE_PORT,
-            user=DATABASE_USER,
-            password=DATABASE_PASSWORD,
-            database=DATABASE_NAME,
-            charset='utf8mb4',
-            autocommit=True,
-            ssl={"ssl_disabled": False} if use_ssl else None
-        )
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
         return conn
-    except pymysql.MySQLError as e:
-        print(f"[ERROR] MySQL connection error: {e}")
-        return None
     except Exception as e:
         print(f"[ERROR] Database connection error: {e}")
         return None
