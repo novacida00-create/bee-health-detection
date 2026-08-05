@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Riwayat Deteksi - BeeHealth{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 animate-slide-in">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0 fw-bold text-wood">
+                <i class="fas fa-history me-2 text-success"></i>Riwayat Deteksi
+            </h2>
+            <a href="/" class="btn btn-honey rounded-pill">
+                <i class="fas fa-plus me-1"></i>Deteksi Baru
+            </a>
+        </div>
+
+        {% if detections %}
+        <div class="card border-0 shadow-lg honey-card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th width="60" class="text-center">No</th>
+                                <th width="80" class="text-center">Gambar</th>
+                                <th>Kondisi Kesehatan</th>
+                                <th>Subspesies</th>
+                                <th class="text-center">Confidence</th>
+                                <th>Waktu</th>
+                                <th width="120" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in detections %}
+                            <tr>
+                                <td class="text-center fw-bold">{{ loop.index }}</td>
+                                <td class="text-center">
+                                    <img src="/static/uploads/{{ d.image_filename }}" alt="Bee"
+                                         class="rounded-3 shadow-sm" width="55" height="55" style="object-fit: cover; border: 2px solid #daa520;">
+                                </td>
+                                <td>
+                                    {% if d.health_status == 'healthy' %}
+                                        <span class="badge bg-success px-3 py-2">
+                                            <i class="fas fa-check-circle me-1"></i>{{ d.health_name }}
+                                        </span>
+                                    {% elif d.health_status == 'warning' %}
+                                        <span class="badge badge-honey text-dark px-3 py-2">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ d.health_name }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger px-3 py-2">
+                                            <i class="fas fa-times-circle me-1"></i>{{ d.health_name }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="small">{{ d.subspecies_name }}</td>
+                                <td class="text-center">
+                                    <span class="fw-bold {% if d.health_confidence >= 80 %}text-success{% elif d.health_confidence >= 60 %}text-honey{% else %}text-danger{% endif %}">
+                                        {{ d.health_confidence }}%
+                                    </span>
+                                </td>
+                                <td class="small text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ d.created_at }}
+                                </td>
+                                <td class="text-center">
+                                    <a href="/result/{{ d.id }}" class="btn btn-sm btn-outline-success rounded-pill me-1" title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="deleteRecord({{ d.id }})" title="Hapus">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 shadow-lg honey-card">
+            <div class="card-body text-center py-5">
+                <div class="empty-state mb-4">
+                    <i class="fas fa-inbox fa-4x text-honey"></i>
+                </div>
+                <h3 class="text-wood fw-bold">Belum Ada Riwayat</h3>
+                <p class="text-muted mb-4">Mulai deteksi kesehatan lebah madu Anda sekarang!</p>
+                <a href="/" class="btn btn-honey btn-lg rounded-pill px-5">
+                    <i class="fas fa-plus me-2"></i>Deteksi Sekarang
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.empty-state {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    transform: scale(1.01);
+    background-color: #fff8dc;
+}
+</style>
+
+<script>
+async function deleteRecord(id) {
+    if (!confirm('Yakin ingin menghapus riwayat ini?')) return;
+
+    try {
+        const response = await fetch('/api/history/' + id, { method: 'DELETE' });
+        const result = await response.json();
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Gagal menghapus data');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

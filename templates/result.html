@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Hasil Deteksi - BeeHealth{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 animate-slide-in">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0 fw-bold text-wood">
+                <i class="fas fa-search-plus me-2 text-success"></i>Hasil Deteksi
+            </h2>
+            <a href="/" class="btn btn-honey rounded-pill">
+                <i class="fas fa-plus me-1"></i>Deteksi Baru
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-lg honey-card mb-4">
+            <div class="card-body p-5">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="result-image-container mb-3">
+                            <img src="/static/uploads/{{ detection.image_filename }}" alt="Bee Image"
+                                 class="img-fluid rounded-3 shadow" style="max-height: 280px; border: 3px solid #daa520;">
+                        </div>
+                        <p class="text-muted small">
+                            <i class="fas fa-clock me-1"></i>{{ detection.created_at }}
+                        </p>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="status-icon me-3" style="font-size: 3rem; color: {{ disease_info.color }};">
+                                {{ disease_info.icon }}
+                            </span>
+                            <div>
+                                <h4 class="mb-1 fw-bold text-wood">{{ detection.health_name }}</h4>
+                                <span class="badge px-3 py-2" style="background-color: {{ disease_info.color }};">
+                                    Status: {{ disease_info.name_id }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <div class="confidence-card p-3 rounded-3 bg-cream text-center">
+                                    <small class="text-muted d-block mb-1">Confidence Kesehatan</small>
+                                    <h3 class="mb-0 fw-bold text-success">{{ detection.health_confidence }}%</h3>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="confidence-card p-3 rounded-3 bg-cream text-center">
+                                    <small class="text-muted d-block mb-1">Confidence Subspesies</small>
+                                    <h3 class="mb-0 fw-bold text-honey">{{ detection.subspecies_confidence }}%</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert mb-0" style="background-color: {{ disease_info.color }}15; color: {{ disease_info.color }}; border-left: 5px solid {{ disease_info.color }}; border-radius: 10px;">
+                            <strong class="d-block mb-1">{{ detection.message }}</strong>
+                            <small>{{ disease_info.description }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold" style="background: linear-gradient(135deg, #daa520, #f4a460);">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Gejala yang Terdeteksi
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            {% for gejala in disease_info.gejala %}
+                            <li class="mb-3 d-flex align-items-start">
+                                <span class="badge badge-honey text-dark me-2 mt-1">!</span>
+                                <span>{{ gejala }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold" style="background: linear-gradient(135deg, #17a2b8, #20c997);">
+                        <i class="fas fa-pills me-2"></i>Rekomendasi Pengobatan
+                    </div>
+                    <div class="card-body">
+                        {% for obat in disease_info.pengobatan %}
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-wood mb-2">
+                                <i class="fas fa-medkit me-1 text-success"></i>{{ obat.metode }}
+                            </h6>
+                            <ol class="mb-0 ps-3">
+                                {% for langkah in obat.langkah %}
+                                <li class="mb-1 small">{{ langkah }}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                        <i class="fas fa-shield-alt me-2"></i>Pencegahan
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            {% for tips in disease_info.pencegahan %}
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                                <span>{{ tips }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header text-white fw-bold" style="background: linear-gradient(135deg, {{ disease_info.color }}, {{ disease_info.color }}cc);">
+                        <i class="fas fa-honey-pot me-2"></i>Status Madu & Estimasi Panen
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4 p-4 rounded-3" style="background-color: {{ disease_info.color }}15;">
+                            <h1 class="mb-2 animate-honey" style="font-size: 3rem;">🍯</h1>
+                            <h4 class="fw-bold mb-0" style="color: {{ disease_info.color }};">
+                                Status Madu: {{ disease_info.madu_status }}
+                            </h4>
+                        </div>
+
+                        <p class="mb-3">{{ disease_info.madu_info }}</p>
+
+                        <div class="bg-cream p-3 rounded-3 mb-3">
+                            <h6 class="fw-bold mb-2 text-wood">
+                                <i class="fas fa-calendar-alt text-success me-2"></i>Estimasi Panen:
+                            </h6>
+                            <p class="mb-0 small">{{ disease_info.estimasi_panen }}</p>
+                        </div>
+
+                        <h6 class="fw-bold mb-2 text-wood">
+                            <i class="fas fa-lightbulb text-honey me-2"></i>Tips Panen:
+                        </h6>
+                        <ul class="small mb-0">
+                            {% for tips in disease_info.tips_panen %}
+                            <li class="mb-1">{{ tips }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.result-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.result-image-container::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border: 3px solid #daa520;
+    border-radius: 15px;
+    opacity: 0.5;
+}
+
+.confidence-card {
+    transition: transform 0.3s ease;
+}
+
+.confidence-card:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}

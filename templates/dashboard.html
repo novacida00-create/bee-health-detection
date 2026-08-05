@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Statistik - BeeHealth{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10 animate-slide-in">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0 fw-bold text-wood">
+                <i class="fas fa-chart-bar me-2 text-success"></i>Dashboard Statistik
+            </h2>
+            <a href="/" class="btn btn-honey rounded-pill">
+                <i class="fas fa-plus me-1"></i>Deteksi Baru
+            </a>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-0 shadow-sm stat-card text-white h-100" style="background: linear-gradient(135deg, #1a5e2a, #28a745);">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-2">
+                            <i class="fas fa-database fa-2x"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0">{{ stats.total }}</h2>
+                        <p class="mb-0 small opacity-75">Total Deteksi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-0 shadow-sm stat-card text-white h-100" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-2">
+                            <i class="fas fa-heartbeat fa-2x"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0">{{ stats.healthy }}</h2>
+                        <p class="mb-0 small opacity-75">Sehat</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-0 shadow-sm stat-card text-dark h-100" style="background: linear-gradient(135deg, #daa520, #f4a460);">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-2">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0">{{ stats.warning }}</h2>
+                        <p class="mb-0 small opacity-75">Waspada</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="card border-0 shadow-sm stat-card text-white h-100" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-2">
+                            <i class="fas fa-skull-crossbones fa-2x"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0">{{ stats.sick }}</h2>
+                        <p class="mb-0 small opacity-75">Sakit</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100 honey-card">
+                    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #fffdf7, #fff8dc);">
+                        <h5 class="mb-0 fw-bold text-wood">
+                            <i class="fas fa-chart-pie text-success me-2"></i>Proporsi Kesehatan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="healthPieChart" height="280"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100 honey-card">
+                    <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #fffdf7, #fff8dc);">
+                        <h5 class="mb-0 fw-bold text-wood">
+                            <i class="fas fa-chart-bar text-honey me-2"></i>Jenis Penyakit
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="diseaseBarChart" height="280"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if detections %}
+        <div class="card border-0 shadow-sm honey-card mb-4">
+            <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #fffdf7, #fff8dc);">
+                <h5 class="mb-0 fw-bold text-wood">
+                    <i class="fas fa-clock text-honey me-2"></i>Deteksi Terbaru (10 Terakhir)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center">No</th>
+                                <th>Waktu</th>
+                                <th>Kondisi</th>
+                                <th class="text-center">Confidence</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in detections %}
+                            <tr>
+                                <td class="text-center fw-bold">{{ loop.index }}</td>
+                                <td class="small">
+                                    <i class="fas fa-clock text-muted me-1"></i>{{ d.created_at }}
+                                </td>
+                                <td>
+                                    {% if d.health_status == 'healthy' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>{{ d.health_name }}
+                                        </span>
+                                    {% elif d.health_status == 'warning' %}
+                                        <span class="badge badge-honey text-dark">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ d.health_name }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>{{ d.health_name }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold {% if d.health_confidence >= 80 %}text-success{% elif d.health_confidence >= 60 %}text-honey{% else %}text-danger{% endif %}">
+                                        {{ d.health_confidence }}%
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="/result/{{ d.id }}" class="btn btn-sm btn-outline-success rounded-pill">
+                                        <i class="fas fa-eye me-1"></i>Detail
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+.stat-card {
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+}
+
+.stat-icon {
+    opacity: 0.8;
+}
+
+.stat-card:hover .stat-icon {
+    opacity: 1;
+    transform: scale(1.1);
+    transition: all 0.3s ease;
+}
+</style>
+
+<script>
+const healthData = {
+    'Sehat': {{ stats.healthy }},
+    'Waspada': {{ stats.warning }},
+    'Sakit': {{ stats.sick }}
+};
+
+const diseaseData = {{ health_counts | tojson }};
+
+const healthCtx = document.getElementById('healthPieChart').getContext('2d');
+new Chart(healthCtx, {
+    type: 'doughnut',
+    data: {
+        labels: Object.keys(healthData),
+        datasets: [{
+            data: Object.values(healthData),
+            backgroundColor: [
+                'rgba(40, 167, 69, 0.8)',
+                'rgba(218, 165, 32, 0.8)',
+                'rgba(220, 53, 69, 0.8)'
+            ],
+            borderColor: [
+                'rgba(40, 167, 69, 1)',
+                'rgba(218, 165, 32, 1)',
+                'rgba(220, 53, 69, 1)'
+            ],
+            borderWidth: 3,
+            hoverOffset: 10
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
+            }
+        }
+    }
+});
+
+const diseaseLabels = Object.keys(diseaseData);
+const diseaseValues = Object.values(diseaseData);
+const diseaseColors = diseaseLabels.map(label => {
+    const l = label.toLowerCase();
+    if (l.includes('healthy')) return 'rgba(40, 167, 69, 0.8)';
+    if (l.includes('few') || l.includes('ant')) return 'rgba(218, 165, 32, 0.8)';
+    return 'rgba(220, 53, 69, 0.8)';
+});
+
+const diseaseCtx = document.getElementById('diseaseBarChart').getContext('2d');
+new Chart(diseaseCtx, {
+    type: 'bar',
+    data: {
+        labels: diseaseLabels,
+        datasets: [{
+            label: 'Jumlah Deteksi',
+            data: diseaseValues,
+            backgroundColor: diseaseColors,
+            borderColor: diseaseColors.map(c => c.replace('0.8', '1')),
+            borderWidth: 2,
+            borderRadius: 10
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                },
+                grid: {
+                    color: 'rgba(0,0,0,0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
