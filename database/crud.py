@@ -1,7 +1,25 @@
+import os
 import pymysql
 from database.connection import get_db_connection
+from config import DATABASE_HOST, DATABASE_PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME
 
 def init_db():
+    try:
+        conn_check = pymysql.connect(
+            host=DATABASE_HOST,
+            port=DATABASE_PORT,
+            user=DATABASE_USER,
+            password=DATABASE_PASSWORD,
+            charset='utf8mb4',
+            autocommit=True,
+            ssl={"ssl_disabled": False} if os.getenv("DATABASE_SSL", "false").lower() == "true" else None
+        )
+        cursor_check = conn_check.cursor()
+        cursor_check.execute(f"CREATE DATABASE IF NOT EXISTS `{DATABASE_NAME}`")
+        conn_check.close()
+    except Exception as e:
+        print(f"[WARN] Could not create database: {e}")
+
     conn = get_db_connection()
     if conn is None:
         print("[WARN] Could not connect to database. Running without database.")

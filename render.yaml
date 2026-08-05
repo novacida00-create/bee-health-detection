@@ -8,11 +8,11 @@ services:
       - key: PYTHON_VERSION
         value: "3.12"
       - key: DATABASE_HOST
-        sync: false
+        value: "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
       - key: DATABASE_PORT
         value: "4000"
       - key: DATABASE_USER
-        sync: false
+        value: "AuodAvJoZCm93fv.root"
       - key: DATABASE_PASSWORD
         sync: false
       - key: DATABASE_NAME
