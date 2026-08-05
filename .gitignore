@@ -11,6 +11,7 @@ ENV/
 .vscode/
 static/uploads/*
 !static/uploads/.gitkeep
+data/
 .env
 *.log
 .DS_Store
