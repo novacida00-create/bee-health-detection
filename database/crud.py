@@ -1,9 +1,5 @@
 import os
-import pymysql
 from database.connection import get_db_connection
-
-def _is_mysql(conn):
-    return isinstance(conn.__class__.__module__.split('.')[0], str) and 'pymysql' in str(type(conn))
 
 def _placeholder(conn):
     try:
@@ -15,11 +11,13 @@ def _placeholder(conn):
     return "?"
 
 def init_db():
-    if os.getenv("DATABASE_HOST"):
+    db_host = os.getenv("DATABASE_HOST")
+    if db_host:
         try:
+            import pymysql
             use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
             conn_check = pymysql.connect(
-                host=os.getenv("DATABASE_HOST"),
+                host=db_host,
                 port=int(os.getenv("DATABASE_PORT", 3306)),
                 user=os.getenv("DATABASE_USER"),
                 password=os.getenv("DATABASE_PASSWORD"),
@@ -32,11 +30,11 @@ def init_db():
             cursor_check.execute("CREATE DATABASE IF NOT EXISTS `{}`".format(db_name))
             conn_check.close()
         except Exception as e:
-            print("[WARN] Could not create database: {}".format(e))
+            print("[WARN] MySQL create db: {}".format(e))
 
     conn = get_db_connection()
     if conn is None:
-        print("[WARN] Could not connect to database.")
+        print("[WARN] No database connection.")
         return
     try:
         cursor = conn.cursor()
@@ -56,7 +54,7 @@ def init_db():
         conn.commit()
         print("[OK] Database table initialized!")
     except Exception as e:
-        print("[ERROR] Database init error: {}".format(e))
+        print("[ERROR] DB init: {}".format(e))
     finally:
         conn.close()
 
@@ -67,13 +65,13 @@ def save_detection(image_filename, health_status, health_name, health_confidence
     try:
         p = _placeholder(conn)
         cursor = conn.cursor()
-        sql = "INSERT INTO detections (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message) VALUES ({}, {}, {}, {}, {}, {}, {})".format(p, p, p, p, p, p, p)
+        sql = "INSERT INTO detections (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message) VALUES ({0},{1},{2},{3},{4},{5},{6})".format(p, p, p, p, p, p, p)
         cursor.execute(sql, (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message))
         conn.commit()
         last_id = cursor.lastrowid
         return last_id
     except Exception as e:
-        print("[ERROR] Database save error: {}".format(e))
+        print("[ERROR] DB save: {}".format(e))
         return None
     finally:
         conn.close()
@@ -89,7 +87,7 @@ def get_all_detections():
         rows = cursor.fetchall()
         return [dict(zip(columns, row)) for row in rows]
     except Exception as e:
-        print("[ERROR] Database fetch error: {}".format(e))
+        print("[ERROR] DB fetch: {}".format(e))
         return []
     finally:
         conn.close()
@@ -108,7 +106,7 @@ def get_detection_by_id(detection_id):
             return dict(zip(columns, row))
         return None
     except Exception as e:
-        print("[ERROR] Database fetch error: {}".format(e))
+        print("[ERROR] DB fetch: {}".format(e))
         return None
     finally:
         conn.close()
@@ -124,7 +122,7 @@ def delete_detection(detection_id):
         conn.commit()
         return cursor.rowcount > 0
     except Exception as e:
-        print("[ERROR] Database delete error: {}".format(e))
+        print("[ERROR] DB delete: {}".format(e))
         return False
     finally:
         conn.close()
@@ -145,7 +143,7 @@ def get_stats():
         sick = cursor.fetchone()[0]
         return {"total": total, "healthy": healthy, "sick": sick, "warning": warning}
     except Exception as e:
-        print("[ERROR] Database stats error: {}".format(e))
+        print("[ERROR] DB stats: {}".format(e))
         return {"total": 0, "healthy": 0, "sick": 0, "warning": 0}
     finally:
         conn.close()

@@ -1,12 +1,10 @@
 import os
-import pymysql
-
-DB_TYPE = os.getenv("DATABASE_TYPE", "sqlite")
 
 def get_db_connection():
-    if DB_TYPE == "sqlite" or not os.getenv("DATABASE_HOST"):
-        return get_sqlite_connection()
-    return get_mysql_connection()
+    db_host = os.getenv("DATABASE_HOST")
+    if db_host:
+        return get_mysql_connection()
+    return get_sqlite_connection()
 
 def get_sqlite_connection():
     import sqlite3
@@ -17,12 +15,13 @@ def get_sqlite_connection():
         conn.row_factory = sqlite3.Row
         return conn
     except Exception as e:
-        print(f"[ERROR] SQLite connection error: {e}")
+        print("[ERROR] SQLite: {}".format(e))
         return None
 
 def get_mysql_connection():
-    use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
     try:
+        import pymysql
+        use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
         conn = pymysql.connect(
             host=os.getenv("DATABASE_HOST"),
             port=int(os.getenv("DATABASE_PORT", 3306)),
@@ -35,5 +34,5 @@ def get_mysql_connection():
         )
         return conn
     except Exception as e:
-        print(f"[ERROR] MySQL connection error: {e}")
-        return None
+        print("[ERROR] MySQL: {}".format(e))
+        return get_sqlite_connection()
