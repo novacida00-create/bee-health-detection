@@ -37,6 +37,12 @@ async def startup_event():
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/api/testsave")
+async def testsave():
+    from database.crud import save_detection
+    result = save_detection("test.jpg", "healthy", "Healthy", 95.0, "Western Honey Bee", 90.0, "Test message")
+    return {"saved_id": result}
+
 @app.get("/api/dbcheck")
 async def dbcheck():
     import os
