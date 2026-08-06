@@ -36,6 +36,8 @@ async def api_predict(file: UploadFile = File(...)):
 
     detection_id = None
     try:
+        from database.crud import init_db
+        init_db()
         detection_id = save_detection(
             image_filename=filename,
             health_status=result["health"]["status"],
@@ -45,8 +47,8 @@ async def api_predict(file: UploadFile = File(...)):
             subspecies_confidence=result["subspecies"]["confidence"],
             message=result["message"]
         )
-    except Exception:
-        pass
+    except Exception as e:
+        print("[ERROR] Save detection failed: {}".format(e))
 
     result["id"] = detection_id
     result["image_url"] = f"/static/uploads/{filename}"
