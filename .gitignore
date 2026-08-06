@@ -13,6 +13,9 @@ static/uploads/*
 !static/uploads/.gitkeep
 data/
 .env
+models/m1_saved/
+models/m2_saved/
+models/temp_*
 *.log
 .DS_Store
 Thumbs.db
