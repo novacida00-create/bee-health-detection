@@ -69,22 +69,26 @@ def init_db():
                 )
             """
         cursor.execute(create_sql)
-        conn.commit()
+        try:
+            cursor.execute("ALTER TABLE detections ADD COLUMN image_base64 LONGTEXT")
+            conn.commit()
+        except Exception:
+            pass
         print("[OK] Database table initialized!")
     except Exception as e:
         print("[ERROR] DB init: {}".format(e))
     finally:
         conn.close()
 
-def save_detection(image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message):
+def save_detection(image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message, image_base64=None):
     conn = get_db_connection()
     if conn is None:
         return None
     try:
         p = _placeholder(conn)
         cursor = conn.cursor()
-        sql = "INSERT INTO detections (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message) VALUES ({0},{1},{2},{3},{4},{5},{6})".format(p, p, p, p, p, p, p)
-        cursor.execute(sql, (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message))
+        sql = "INSERT INTO detections (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message, image_base64) VALUES ({0},{1},{2},{3},{4},{5},{6},{7})".format(p, p, p, p, p, p, p, p)
+        cursor.execute(sql, (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message, image_base64))
         conn.commit()
         last_id = cursor.lastrowid
         return last_id

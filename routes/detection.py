@@ -1,5 +1,6 @@
 import os
 import uuid
+import base64
 import tempfile
 from fastapi import APIRouter, UploadFile, File, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -28,14 +29,15 @@ async def api_predict(file: UploadFile = File(...)):
         with open(filepath, "wb") as f:
             f.write(contents)
     except Exception:
-        filename = "unknown"
+        pass
+
+    image_b64 = base64.b64encode(contents).decode("utf-8")
 
     from io import BytesIO
     image_bytes = BytesIO(contents)
     result = predict(image_bytes)
 
     detection_id = None
-    save_error = None
     try:
         from database.crud import init_db
         init_db()
@@ -46,10 +48,10 @@ async def api_predict(file: UploadFile = File(...)):
             health_confidence=result["health"]["confidence"],
             subspecies_name=result["subspecies"]["name"],
             subspecies_confidence=result["subspecies"]["confidence"],
-            message=result["message"]
+            message=result["message"],
+            image_base64=image_b64
         )
     except Exception as e:
-        save_error = str(e)
         print("[ERROR] Save detection failed: {}".format(e))
 
     result["id"] = detection_id
