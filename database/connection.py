@@ -7,8 +7,7 @@ TIDB_PASS = "MnQyQRQipJd3q7Jv"
 TIDB_DB = "bee_detection"
 
 def get_db_connection():
-    db_host = os.getenv("DATABASE_HOST", TIDB_HOST)
-    if db_host:
+    if os.getenv("DATABASE_HOST") or os.getenv("VERCEL"):
         conn = get_mysql_connection()
         if conn is not None:
             return conn
