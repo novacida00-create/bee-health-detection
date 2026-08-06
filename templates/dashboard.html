@@ -173,7 +173,9 @@
     transition: all 0.3s ease;
 }
 </style>
+{% endblock %}
 
+{% block scripts %}
 <script>
 const healthData = {
     'Sehat': {{ stats.healthy }},
