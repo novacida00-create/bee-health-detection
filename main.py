@@ -4,15 +4,17 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 from core.model_loader import load_models
 from database.crud import init_db
 from routes import detection, history, dashboard
 
 app = FastAPI(title="Bee Health Detection", version="1.0.0")
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 app.include_router(detection.router)
 app.include_router(history.router)
