@@ -38,19 +38,37 @@ def init_db():
         return
     try:
         cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS detections (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                image_filename VARCHAR(255) NOT NULL,
-                health_status VARCHAR(100) NOT NULL,
-                health_name VARCHAR(200) NOT NULL,
-                health_confidence REAL NOT NULL,
-                subspecies_name VARCHAR(200) NOT NULL,
-                subspecies_confidence REAL NOT NULL,
-                message TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        p = _placeholder(conn)
+        is_mysql = (p == "%s")
+        if is_mysql:
+            create_sql = """
+                CREATE TABLE IF NOT EXISTS detections (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    image_filename VARCHAR(255) NOT NULL,
+                    health_status VARCHAR(100) NOT NULL,
+                    health_name VARCHAR(200) NOT NULL,
+                    health_confidence FLOAT NOT NULL,
+                    subspecies_name VARCHAR(200) NOT NULL,
+                    subspecies_confidence FLOAT NOT NULL,
+                    message TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """
+        else:
+            create_sql = """
+                CREATE TABLE IF NOT EXISTS detections (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    image_filename VARCHAR(255) NOT NULL,
+                    health_status VARCHAR(100) NOT NULL,
+                    health_name VARCHAR(200) NOT NULL,
+                    health_confidence REAL NOT NULL,
+                    subspecies_name VARCHAR(200) NOT NULL,
+                    subspecies_confidence REAL NOT NULL,
+                    message TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """
+        cursor.execute(create_sql)
         conn.commit()
         print("[OK] Database table initialized!")
     except Exception as e:
