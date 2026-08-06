@@ -35,8 +35,15 @@
                             <tr>
                                 <td class="text-center fw-bold">{{ loop.index }}</td>
                                 <td class="text-center">
+                                    {% if d.image_filename and d.image_filename != 'unknown' %}
                                     <img src="/static/uploads/{{ d.image_filename }}" alt="Bee"
-                                         class="rounded-3 shadow-sm" width="55" height="55" style="object-fit: cover; border: 2px solid #daa520;">
+                                         class="rounded-3 shadow-sm" width="55" height="55" style="object-fit: cover; border: 2px solid #daa520;"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    {% endif %}
+                                    <div class="rounded-3 shadow-sm bg-light align-items-center justify-content-center" 
+                                         style="width:55px;height:55px;border:2px solid #daa520;{% if d.image_filename and d.image_filename != 'unknown' %}display:none;{% else %}display:flex;{% endif %}">
+                                        <i class="fas fa-bee text-honey"></i>
+                                    </div>
                                 </td>
                                 <td>
                                     {% if d.health_status == 'healthy' %}
