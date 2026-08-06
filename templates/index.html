@@ -80,6 +80,8 @@
                 </div>
 
                 <div id="errorAlert" class="alert alert-danger mt-3" style="display: none;"></div>
+
+                <div id="resultInline" class="mt-4" style="display: none;"></div>
             </div>
         </div>
     </div>
@@ -461,8 +463,8 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
 
         if (result.success && result.data.id) {
             window.location.href = '/result/' + result.data.id;
-        } else if (result.success && result.data.image_url) {
-            window.location.href = '/dashboard';
+        } else if (result.success && result.data) {
+            showResult(result.data);
         } else {
             showError(result.error || 'Terjadi kesalahan saat memproses gambar');
         }
@@ -480,6 +482,81 @@ function showError(message) {
     errorDiv.style.display = 'block';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('predictBtn').style.display = 'block';
+}
+
+function showResult(data) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('predictBtn').style.display = 'block';
+    document.getElementById('resultInline').style.display = 'block';
+
+    const h = data.health;
+    const s = data.subspecies;
+    const d = data.disease_info;
+
+    const statusColors = {healthy: '#28a745', warning: '#ffc107', danger: '#dc3545'};
+    const statusBadge = {healthy: 'success', warning: 'warning', danger: 'danger'};
+    const statusText = {healthy: 'SEHAT', warning: 'WASPADA', danger: 'BAHAYA'};
+
+    const status = h.status || 'healthy';
+
+    let gejalaHtml = '';
+    if (d.gejala) {
+        gejalaHtml = '<ul class="list-unstyled mb-0">' + d.gejala.map(g => '<li class="mb-1"><i class="fas fa-exclamation-circle text-warning me-2"></i>' + g + '</li>').join('') + '</ul>';
+    }
+
+    let pengobatanHtml = '';
+    if (d.pengobatan) {
+        pengobatanHtml = d.pengobatan.map(p => '<div class="mb-3"><h6 class="fw-bold text-wood"><i class="fas fa-medkit text-success me-2"></i>' + p.metode + '</h6><ol class="small">' + p.langkah.map(l => '<li class="mb-1">' + l + '</li>').join('') + '</ol></div>').join('');
+    }
+
+    let pencegahanHtml = '';
+    if (d.pencegahan) {
+        pencegahanHtml = '<ul class="list-unstyled small mb-0">' + d.pencegahan.map(p => '<li class="mb-1"><i class="fas fa-shield-alt text-success me-2"></i>' + p + '</li>').join('') + '</ul>';
+    }
+
+    let tipsHtml = '';
+    if (d.tips_panen) {
+        tipsHtml = '<ul class="list-unstyled small mb-0">' + d.tips_panen.map(t => '<li class="mb-1"><i class="fas fa-lightbulb text-honey me-2"></i>' + t + '</li>').join('') + '</ul>';
+    }
+
+    document.getElementById('resultInline').innerHTML = '<div class="card border-0 shadow-lg">' +
+        '<div class="card-header text-white fw-bold p-3" style="background:' + statusColors[status] + '">' +
+        '<i class="fas fa-clipboard-check me-2"></i>Hasil Deteksi - ' + statusText[status] + '</div>' +
+        '<div class="card-body p-4">' +
+        '<div class="row mb-4">' +
+        '<div class="col-md-6 mb-3"><div class="card h-100 border-0 bg-cream"><div class="card-body">' +
+        '<h6 class="fw-bold text-wood"><i class="fas fa-paw me-2 text-success"></i>Jenis Subspecies</h6>' +
+        '<h4 class="fw-bold mb-1">' + s.name + '</h4>' +
+        '<span class="badge bg-success">' + s.confidence + '% Confidence</span>' +
+        '</div></div></div>' +
+        '<div class="col-md-6 mb-3"><div class="card h-100 border-0 bg-cream"><div class="card-body">' +
+        '<h6 class="fw-bold text-wood"><i class="fas fa-heartbeat me-2 text-danger"></i>Kondisi Kesehatan</h6>' +
+        '<h4 class="fw-bold mb-1">' + h.name_id + '</h4>' +
+        '<span class="badge bg-' + statusBadge[status] + '">' + h.confidence + '% Confidence</span>' +
+        '</div></div></div>' +
+        '</div>' +
+        '<div class="alert mb-4" style="background:' + statusColors[status] + '20; border-left:4px solid ' + statusColors[status] + '">' +
+        '<i class="fas fa-info-circle me-2" style="color:' + statusColors[status] + '"></i>' + data.message + '</div>' +
+        '<div class="row">' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-notes-medical text-danger me-2"></i>Gejala</h5>' + gejalaHtml +
+        '</div></div></div>' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-medkit text-success me-2"></i>Pengobatan</h5>' + pengobatanHtml +
+        '</div></div></div>' +
+        '</div>' +
+        '<div class="row">' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-shield-alt text-success me-2"></i>Pencegahan</h5>' + pencegahanHtml +
+        '</div></div></div>' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-honey-pot text-honey me-2"></i>Status Madu</h5>' +
+        '<div class="alert fw-bold mb-3" style="background:' + statusColors[status] + '20; border-left:4px solid ' + statusColors[status] + '">' + (d.madu_status || '') + '</div>' +
+        '<p class="small text-muted">' + (d.madu_info || '') + '</p>' +
+        '<h6 class="fw-bold text-wood mt-3"><i class="fas fa-clock me-2"></i>' + (d.estimasi_panen || '') + '</h6>' +
+        '</div></div></div>' +
+        '</div>' +
+        '</div></div>';
 }
 
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
