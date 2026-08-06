@@ -1,7 +1,13 @@
 import os
 
+TIDB_HOST = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
+TIDB_PORT = 4000
+TIDB_USER = "AuodAvJoZCm93fv.root"
+TIDB_PASS = "aOjbLSoCFwYo0OZe"
+TIDB_DB = "bee_detection"
+
 def get_db_connection():
-    db_host = os.getenv("DATABASE_HOST")
+    db_host = os.getenv("DATABASE_HOST", TIDB_HOST)
     if db_host:
         conn = get_mysql_connection()
         if conn is not None:
@@ -23,20 +29,16 @@ def get_sqlite_connection():
 def get_mysql_connection():
     try:
         import pymysql
-        use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
-        ssl_args = {}
-        if use_ssl:
-            ssl_args = {"ssl": {"fake": True}}
         conn = pymysql.connect(
-            host=os.getenv("DATABASE_HOST"),
-            port=int(os.getenv("DATABASE_PORT", 3306)),
-            user=os.getenv("DATABASE_USER"),
-            password=os.getenv("DATABASE_PASSWORD"),
-            database=os.getenv("DATABASE_NAME", "bee_detection"),
+            host=os.getenv("DATABASE_HOST", TIDB_HOST),
+            port=int(os.getenv("DATABASE_PORT", TIDB_PORT)),
+            user=os.getenv("DATABASE_USER", TIDB_USER),
+            password=os.getenv("DATABASE_PASSWORD", TIDB_PASS),
+            database=os.getenv("DATABASE_NAME", TIDB_DB),
             charset='utf8mb4',
             autocommit=True,
             connect_timeout=10,
-            ssl=ssl_args if ssl_args else None
+            ssl={"ssl_disabled": False}
         )
         print("[OK] MySQL connected!")
         return conn
