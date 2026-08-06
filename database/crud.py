@@ -1,20 +1,53 @@
+import os
+import pymysql
 from database.connection import get_db_connection
 
+def _is_mysql(conn):
+    return isinstance(conn.__class__.__module__.split('.')[0], str) and 'pymysql' in str(type(conn))
+
+def _placeholder(conn):
+    try:
+        import pymysql
+        if isinstance(conn, pymysql.connections.Connection):
+            return "%s"
+    except:
+        pass
+    return "?"
+
 def init_db():
+    if os.getenv("DATABASE_HOST"):
+        try:
+            use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
+            conn_check = pymysql.connect(
+                host=os.getenv("DATABASE_HOST"),
+                port=int(os.getenv("DATABASE_PORT", 3306)),
+                user=os.getenv("DATABASE_USER"),
+                password=os.getenv("DATABASE_PASSWORD"),
+                charset='utf8mb4',
+                autocommit=True,
+                ssl={"ssl_disabled": False} if use_ssl else None
+            )
+            cursor_check = conn_check.cursor()
+            db_name = os.getenv("DATABASE_NAME", "bee_detection")
+            cursor_check.execute("CREATE DATABASE IF NOT EXISTS `{}`".format(db_name))
+            conn_check.close()
+        except Exception as e:
+            print("[WARN] Could not create database: {}".format(e))
+
     conn = get_db_connection()
     if conn is None:
-        print("[WARN] Could not connect to database. Running without database.")
+        print("[WARN] Could not connect to database.")
         return
     try:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS detections (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                image_filename TEXT NOT NULL,
-                health_status TEXT NOT NULL,
-                health_name TEXT NOT NULL,
+                image_filename VARCHAR(255) NOT NULL,
+                health_status VARCHAR(100) NOT NULL,
+                health_name VARCHAR(200) NOT NULL,
                 health_confidence REAL NOT NULL,
-                subspecies_name TEXT NOT NULL,
+                subspecies_name VARCHAR(200) NOT NULL,
                 subspecies_confidence REAL NOT NULL,
                 message TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -23,7 +56,7 @@ def init_db():
         conn.commit()
         print("[OK] Database table initialized!")
     except Exception as e:
-        print(f"[ERROR] Database init error: {e}")
+        print("[ERROR] Database init error: {}".format(e))
     finally:
         conn.close()
 
@@ -32,16 +65,15 @@ def save_detection(image_filename, health_status, health_name, health_confidence
     if conn is None:
         return None
     try:
+        p = _placeholder(conn)
         cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO detections (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message))
+        sql = "INSERT INTO detections (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message) VALUES ({}, {}, {}, {}, {}, {}, {})".format(p, p, p, p, p, p, p)
+        cursor.execute(sql, (image_filename, health_status, health_name, health_confidence, subspecies_name, subspecies_confidence, message))
         conn.commit()
         last_id = cursor.lastrowid
         return last_id
     except Exception as e:
-        print(f"[ERROR] Database save error: {e}")
+        print("[ERROR] Database save error: {}".format(e))
         return None
     finally:
         conn.close()
@@ -57,7 +89,7 @@ def get_all_detections():
         rows = cursor.fetchall()
         return [dict(zip(columns, row)) for row in rows]
     except Exception as e:
-        print(f"[ERROR] Database fetch error: {e}")
+        print("[ERROR] Database fetch error: {}".format(e))
         return []
     finally:
         conn.close()
@@ -67,15 +99,16 @@ def get_detection_by_id(detection_id):
     if conn is None:
         return None
     try:
+        p = _placeholder(conn)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM detections WHERE id = ?", (detection_id,))
+        cursor.execute("SELECT * FROM detections WHERE id = {}".format(p), (detection_id,))
         row = cursor.fetchone()
         if row:
             columns = [desc[0] for desc in cursor.description]
             return dict(zip(columns, row))
         return None
     except Exception as e:
-        print(f"[ERROR] Database fetch error: {e}")
+        print("[ERROR] Database fetch error: {}".format(e))
         return None
     finally:
         conn.close()
@@ -85,12 +118,13 @@ def delete_detection(detection_id):
     if conn is None:
         return False
     try:
+        p = _placeholder(conn)
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM detections WHERE id = ?", (detection_id,))
+        cursor.execute("DELETE FROM detections WHERE id = {}".format(p), (detection_id,))
         conn.commit()
         return cursor.rowcount > 0
     except Exception as e:
-        print(f"[ERROR] Database delete error: {e}")
+        print("[ERROR] Database delete error: {}".format(e))
         return False
     finally:
         conn.close()
@@ -111,7 +145,7 @@ def get_stats():
         sick = cursor.fetchone()[0]
         return {"total": total, "healthy": healthy, "sick": sick, "warning": warning}
     except Exception as e:
-        print(f"[ERROR] Database stats error: {e}")
+        print("[ERROR] Database stats error: {}".format(e))
         return {"total": 0, "healthy": 0, "sick": 0, "warning": 0}
     finally:
         conn.close()
