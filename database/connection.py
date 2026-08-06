@@ -3,7 +3,9 @@ import os
 def get_db_connection():
     db_host = os.getenv("DATABASE_HOST")
     if db_host:
-        return get_mysql_connection()
+        conn = get_mysql_connection()
+        if conn is not None:
+            return conn
     return get_sqlite_connection()
 
 def get_sqlite_connection():
@@ -22,6 +24,9 @@ def get_mysql_connection():
     try:
         import pymysql
         use_ssl = os.getenv("DATABASE_SSL", "false").lower() == "true"
+        ssl_args = {}
+        if use_ssl:
+            ssl_args = {"ssl": {"fake": True}}
         conn = pymysql.connect(
             host=os.getenv("DATABASE_HOST"),
             port=int(os.getenv("DATABASE_PORT", 3306)),
@@ -30,9 +35,11 @@ def get_mysql_connection():
             database=os.getenv("DATABASE_NAME", "bee_detection"),
             charset='utf8mb4',
             autocommit=True,
-            ssl={"ssl_disabled": False} if use_ssl else None
+            connect_timeout=10,
+            ssl=ssl_args if ssl_args else None
         )
+        print("[OK] MySQL connected!")
         return conn
     except Exception as e:
         print("[ERROR] MySQL: {}".format(e))
-        return get_sqlite_connection()
+        return None

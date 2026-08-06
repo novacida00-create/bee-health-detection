@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -36,6 +36,32 @@ async def startup_event():
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/api/dbcheck")
+async def dbcheck():
+    import os
+    info = {
+        "DATABASE_HOST": os.getenv("DATABASE_HOST", "NOT SET"),
+        "DATABASE_PORT": os.getenv("DATABASE_PORT", "NOT SET"),
+        "DATABASE_USER": os.getenv("DATABASE_USER", "NOT SET"),
+        "DATABASE_PASSWORD": "SET" if os.getenv("DATABASE_PASSWORD") else "NOT SET",
+        "DATABASE_NAME": os.getenv("DATABASE_NAME", "NOT SET"),
+        "DATABASE_SSL": os.getenv("DATABASE_SSL", "NOT SET"),
+    }
+    from database.connection import get_db_connection
+    conn = get_db_connection()
+    if conn is None:
+        info["connection"] = "FAILED"
+        return info
+    info["connection"] = "OK"
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM detections")
+        info["detection_count"] = cursor.fetchone()[0]
+    except Exception as e:
+        info["query_error"] = str(e)
+    conn.close()
+    return info
 
 if __name__ == "__main__":
     import uvicorn
