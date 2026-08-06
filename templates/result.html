@@ -19,8 +19,13 @@
                 <div class="row">
                     <div class="col-md-4 text-center mb-4">
                         <div class="result-image-container mb-3">
+                            {% if detection.image_base64 %}
+                            <img src="data:image/jpeg;base64,{{ detection.image_base64 }}" alt="Bee Image"
+                                 class="img-fluid rounded-3 shadow" style="max-height: 280px; border: 3px solid #daa520;">
+                            {% else %}
                             <img src="/static/uploads/{{ detection.image_filename }}" alt="Bee Image"
                                  class="img-fluid rounded-3 shadow" style="max-height: 280px; border: 3px solid #daa520;">
+                            {% endif %}
                         </div>
                         <p class="text-muted small">
                             <i class="fas fa-clock me-1"></i>{{ detection.created_at }}
