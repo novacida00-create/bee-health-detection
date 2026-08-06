@@ -3,7 +3,7 @@ import os
 TIDB_HOST = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com"
 TIDB_PORT = 4000
 TIDB_USER = "AuodAvJoZCm93fv.root"
-TIDB_PASS = "aOjbLSoCFwYo0OZe"
+TIDB_PASS = "MnQyQRQipJd3q7Jv"
 TIDB_DB = "bee_detection"
 
 def get_db_connection():
