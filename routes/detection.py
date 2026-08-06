@@ -35,6 +35,7 @@ async def api_predict(file: UploadFile = File(...)):
     result = predict(image_bytes)
 
     detection_id = None
+    save_error = None
     try:
         from database.crud import init_db
         init_db()
@@ -48,6 +49,7 @@ async def api_predict(file: UploadFile = File(...)):
             message=result["message"]
         )
     except Exception as e:
+        save_error = str(e)
         print("[ERROR] Save detection failed: {}".format(e))
 
     result["id"] = detection_id
