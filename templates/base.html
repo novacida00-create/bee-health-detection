@@ -27,6 +27,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.url.path == '/deteksi' %}active{% endif %}" href="/deteksi">
+                            <i class="fas fa-search me-1"></i> Deteksi
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.url.path == '/history' %}active{% endif %}" href="/history">
                             <i class="fas fa-history me-1"></i> Riwayat
                         </a>

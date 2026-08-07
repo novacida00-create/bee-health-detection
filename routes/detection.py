@@ -108,7 +108,7 @@ async def api_predict_bulk(files: List[UploadFile] = File(...)):
 
 @router.get("/predict-page", response_class=HTMLResponse)
 async def predict_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("deteksi.html", {"request": request})
 
 @router.get("/result/{detection_id}", response_class=HTMLResponse)
 async def result_page(request: Request, detection_id: int):

@@ -35,7 +35,11 @@ async def startup_event():
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("beranda.html", {"request": request})
+
+@app.get("/deteksi", response_class=HTMLResponse)
+async def deteksi(request: Request):
+    return templates.TemplateResponse("deteksi.html", {"request": request})
 
 @app.get("/api/testsave")
 async def testsave():

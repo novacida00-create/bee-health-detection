@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block title %}Beranda - BeeHealth{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5 mb-5 rounded-4 shadow-lg position-relative overflow-hidden">
+    <div class="hero-overlay"></div>
+    <div class="bee-pattern"></div>
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="bee-animation mb-4">
+            <i class="fas fa-bee fa-5x bee-flight"></i>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-honey-pot me-2"></i>
+            Deteksi Kesehatan Lebah Madu
+        </h1>
+        <p class="lead mb-4">
+            Sistem cerdas berbasis CNN untuk mendeteksi kesehatan lebah, 
+            jenis penyakit, dan menentukan kelayakan madu untuk dikonsumsi
+        </p>
+        <a href="/deteksi" class="btn btn-light btn-lg px-5 py-3 rounded-pill shadow">
+            <i class="fas fa-camera me-2"></i>Mulai Deteksi
+        </a>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold text-wood">
+            <i class="fas fa-bullseye me-2 text-success"></i>Tujuan Proyek
+        </h2>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm step-card">
+            <div class="card-body text-center p-4">
+                <div class="step-number mb-3">1</div>
+                <div class="step-icon mb-3">
+                    <i class="fas fa-search fa-2x text-success"></i>
+                </div>
+                <h4 class="fw-bold text-wood">Deteksi Dini</h4>
+                <p class="text-muted">Mendeteksi penyakit lebah madu sejak dini untuk mencegah kerugian yang lebih besar</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm step-card">
+            <div class="card-body text-center p-4">
+                <div class="step-number mb-3">2</div>
+                <div class="step-icon mb-3">
+                    <i class="fas fa-shield-alt fa-2x text-honey"></i>
+                </div>
+                <h4 class="fw-bold text-wood">Keamanan Madu</h4>
+                <p class="text-muted">Memastikan madu yang dihasilkan aman untuk dikonsumsi manusia</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm step-card">
+            <div class="card-body text-center p-4">
+                <div class="step-number mb-3">3</div>
+                <div class="step-icon mb-3">
+                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                </div>
+                <h4 class="fw-bold text-wood"> Produktivitas</h4>
+                <p class="text-muted">Meningkatkan produktivitas peternakan lebah dengan pemantauan berkala</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold text-wood">
+            <i class="fas fa-heartbeat me-2 text-success"></i>Manfaat Sistem
+        </h2>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3 text-wood">
+                    <i class="fas fa-user-shield text-success me-2"></i>Untuk Peternak
+                </h4>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Deteksi otomatis penyakit lebah tanpa ahli</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Rekomendasi pengobatan yang tepat sasaran</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Estimasi waktu panen madu yang akurat</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Riwayat deteksi untuk pemantauan jangka panjang</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3 text-wood">
+                    <i class="fas fa-users text-honey me-2"></i>Untuk Konsumen
+                </h4>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Menjamin keamanan madu sebelum dikonsumsi</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Mengetahui asal-usul kualitas madu</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Informasi lengkap tentang kesehatan lebah</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fas fa-check text-success me-2 mt-1"></i>
+                        <span>Meningkatkan kepercayaan terhadap produk madu</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold text-wood">
+            <i class="fas fa-cogs me-2 text-success"></i>Fitur Utama
+        </h2>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card healthy">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-camera fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Upload Gambar</h5>
+                <p class="card-text small text-muted">Upload foto lebah untuk dianalisis kesehatannya</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card warning">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-brain fa-3x text-honey"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Analisis CNN</h5>
+                <p class="card-text small text-muted">Model AI menganalisis gambar secara instan</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card danger">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-file-medical fa-3x text-danger"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Hasil Lengkap</h5>
+                <p class="card-text small text-muted">Dapatkan diagnosis, pengobatan, dan tips panen</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold text-wood">
+            <i class="fas fa-heartbeat me-2 text-success"></i>Jenis Penyakit yang Terdeteksi
+        </h2>
+        <p class="text-muted">Sistem kami dapat mendeteksi 6 jenis kondisi kesehatan lebah</p>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card healthy">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-check-circle fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Healthy (Sehat)</h5>
+                <p class="card-text small text-muted">Lebah dalam kondisi sehat dan prima</p>
+                <span class="badge bg-success px-3 py-2">
+                    <i class="fas fa-honey-pot me-1"></i>Madu AMAN
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card warning">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-honey"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Few Varroa</h5>
+                <p class="card-text small text-muted">Sedikit kutu Varroa & kumbang</p>
+                <span class="badge badge-honey text-dark px-3 py-2">
+                    <i class="fas fa-honey-pot me-1"></i>Madu HATI-HATI
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card danger">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-times-circle fa-3x text-danger"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Varroa Infected</h5>
+                <p class="card-text small text-muted">Terinfeksi kutu Varroa parah</p>
+                <span class="badge bg-danger px-3 py-2">
+                    <i class="fas fa-honey-pot me-1"></i>Madu TIDAK AMAN
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3 text-wood">
+                    <i class="fas fa-lightbulb text-honey me-2"></i>Tips untuk Peternak
+                </h4>
+                <div class="tip-item mb-3 p-3 bg-cream rounded">
+                    <h6 class="fw-bold mb-2 text-wood">
+                        <i class="fas fa-search text-success me-2"></i>Inspeksi Rutin
+                    </h6>
+                    <p class="small text-muted mb-0">Periksa sarang minimal 2 minggu sekali untuk mendeteksi masalah sejak dini.</p>
+                </div>
+                <div class="tip-item mb-3 p-3 bg-cream rounded">
+                    <h6 class="fw-bold mb-2 text-wood">
+                        <i class="fas fa-camera text-success me-2"></i>Dokumentasikan
+                    </h6>
+                    <p class="small text-muted mb-0">Ambil foto lebah secara berkala untuk memantau perkembangan kesehatan.</p>
+                </div>
+                <div class="tip-item p-3 bg-cream rounded">
+                    <h6 class="fw-bold mb-2 text-wood">
+                        <i class="fas fa-book text-honey me-2"></i>Pelajari Gejala
+                    </h6>
+                    <p class="small text-muted mb-0">Kenali tanda-tanda penyakit lebah agar bisa ditangani dengan cepat.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3 text-wood">
+                    <i class="fas fa-info-circle text-success me-2"></i>Tentang Teknologi
+                </h4>
+                <p class="text-muted">
+                    Sistem ini menggunakan teknologi 
+                    <strong class="text-wood">Convolutional Neural Network (CNN)</strong> untuk menganalisis 
+                    gambar lebah dan mendeteksi kondisi kesehatannya.
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Deteksi 6 jenis kondisi kesehatan</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Identifikasi jenis penyakit</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Rekomendasi pengobatan</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Status kelayakan madu</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Estimasi waktu panen</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card text-white border-0 shadow cta-card position-relative overflow-hidden">
+            <div class="cta-overlay"></div>
+            <div class="cta-honeycomb"></div>
+            <div class="card-body p-5 text-center position-relative" style="z-index: 2;">
+                <h3 class="fw-bold mb-3">
+                    <i class="fas fa-rocket me-2"></i>Siap Mencoba?
+                </h3>
+                <p class="mb-4">Mulai deteksi kesehatan lebah madu Anda sekarang!</p>
+                <a href="/deteksi" class="btn btn-light btn-lg px-5 py-3 rounded-pill">
+                    <i class="fas fa-play me-2"></i>Mulai Sekarang
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: url('https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=1200&q=80') center/cover no-repeat;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(26, 94, 42, 0.9) 0%, rgba(40, 167, 69, 0.85) 50%, rgba(218, 165, 32, 0.8) 100%);
+    z-index: 1;
+}
+
+.bee-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: 0;
+}
+
+.hero-section h1 {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-section .lead {
+    color: rgba(255,255,255,0.95);
+}
+
+.bee-animation {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.step-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(139, 69, 19, 0.15) !important;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #28a745, #daa520);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.health-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.health-card:hover {
+    transform: translateY(-5px);
+}
+
+.health-card.healthy:hover {
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3) !important;
+}
+
+.health-card.warning:hover {
+    box-shadow: 0 10px 30px rgba(218, 165, 32, 0.3) !important;
+}
+
+.health-card.danger:hover {
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3) !important;
+}
+
+.health-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.cta-card {
+    background: url('https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=1200&q=80') center/cover no-repeat;
+    border-radius: 20px;
+}
+
+.cta-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.93) 0%, rgba(218, 165, 32, 0.9) 100%);
+    z-index: 1;
+}
+
+.cta-honeycomb {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: 0;
+}
+</style>
+{% endblock %}

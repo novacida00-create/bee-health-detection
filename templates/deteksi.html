@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+{% block title %}Deteksi - BeeHealth{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-lg-8 text-center">
+        <h2 class="fw-bold text-wood mb-2">
+            <i class="fas fa-search-plus me-2 text-success"></i>Deteksi Kesehatan Lebah
+        </h2>
+        <p class="text-muted">Upload gambar lebah untuk dianalisis kesehatannya</p>
+    </div>
+</div>
+
+<div class="row justify-content-center mb-5">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-lg honey-card" id="upload-section">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="upload-icon mb-3 animate-honey">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-honey"></i>
+                    </div>
+                    <h3 class="fw-bold text-wood">Upload Gambar Lebah</h3>
+                    <p class="text-muted">Pilih gambar lebah untuk dideteksi kondisinya</p>
+                </div>
+
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-honey active" id="singleModeBtn" onclick="setMode('single')">
+                            <i class="fas fa-image me-1"></i>1 Foto
+                        </button>
+                        <button type="button" class="btn btn-honey" id="bulkModeBtn" onclick="setMode('bulk')">
+                            <i class="fas fa-images me-1"></i>Banyak Foto
+                        </button>
+                    </div>
+                </div>
+
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-area p-4 rounded-3 text-center mb-4" id="dropZone">
+                        <input type="file" class="d-none" id="beeImage" name="file" 
+                               accept="image/jpeg,image/png,image/jpg" required>
+                        <div id="uploadPrompt">
+                            <i class="fas fa-images fa-3x text-muted mb-3"></i>
+                            <p class="mb-2">Drag & drop gambar ke sini</p>
+                            <p class="text-muted small">atau</p>
+                            <button type="button" class="btn btn-honey btn-lg" onclick="document.getElementById('beeImage').click()">
+                                <i class="fas fa-folder-open me-2"></i>Pilih Gambar
+                            </button>
+                            <p class="text-muted small mt-3 mb-0" id="fileHelpText">Format: JPG, PNG (Maks. 5MB)</p>
+                        </div>
+                        <div id="imagePreview" style="display: none;">
+                            <img id="previewImg" src="#" alt="Preview" class="img-fluid rounded shadow mb-3" 
+                                 style="max-height: 250px; border: 3px solid #daa520;">
+                            <br>
+                            <button type="button" class="btn btn-outline-danger btn-sm me-2" onclick="clearImage()">
+                                <i class="fas fa-times me-1"></i>Hapus
+                            </button>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="document.getElementById('beeImage').click()">
+                                <i class="fas fa-exchange-alt me-1"></i>Ganti
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg py-3 rounded-pill" id="predictBtn">
+                            <i class="fas fa-search-plus me-2"></i>Deteksi Sekarang
+                        </button>
+                    </div>
+                </form>
+
+                <div id="loading" class="text-center py-5" style="display: none;">
+                    <div class="spinner-grow text-success" role="status" style="width: 4rem; height: 4rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h4 class="mt-4 fw-bold text-wood" id="loadingText">Menganalisis Gambar...</h4>
+                    <p class="text-muted" id="loadingDesc">Sistem sedang memproses gambar lebah Anda</p>
+                    <div class="progress mt-3" style="height: 8px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+                    </div>
+                </div>
+
+                <div id="errorAlert" class="alert alert-danger mt-3" style="display: none;"></div>
+
+                <div id="resultInline" class="mt-4" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold text-wood">
+            <i class="fas fa-cogs me-2 text-success"></i>Bagaimana Cara Kerjanya?
+        </h2>
+        <p class="text-muted">Sistem kami menggunakan Deep Learning (CNN) untuk menganalisis gambar lebah</p>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm step-card">
+            <div class="card-body text-center p-4">
+                <div class="step-number mb-3">1</div>
+                <div class="step-icon mb-3">
+                    <i class="fas fa-camera fa-2x text-success"></i>
+                </div>
+                <h4 class="fw-bold text-wood">Upload Gambar</h4>
+                <p class="text-muted">Ambil foto lebah dari sarang Anda dan upload ke sistem</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm step-card">
+            <div class="card-body text-center p-4">
+                <div class="step-number mb-3">2</div>
+                <div class="step-icon mb-3">
+                    <i class="fas fa-brain fa-2x text-honey"></i>
+                </div>
+                <h4 class="fw-bold text-wood">Analisis CNN</h4>
+                <p class="text-muted">Model CNN menganalisis gambar untuk mendeteksi kesehatan lebah</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm step-card">
+            <div class="card-body text-center p-4">
+                <div class="step-number mb-3">3</div>
+                <div class="step-icon mb-3">
+                    <i class="fas fa-chart-line fa-2x text-success"></i>
+                </div>
+                <h4 class="fw-bold text-wood">Dapatkan Hasil</h4>
+                <p class="text-muted">Lihat hasil deteksi beserta tips pengobatan dan status madu</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold text-wood">
+            <i class="fas fa-heartbeat me-2 text-success"></i>Deteksi yang Dapat Dilakukan
+        </h2>
+        <p class="text-muted">Sistem kami dapat mendeteksi 6 jenis kondisi kesehatan lebah</p>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card healthy">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-check-circle fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Healthy (Sehat)</h5>
+                <p class="card-text small text-muted">Lebah dalam kondisi sehat dan prima</p>
+                <span class="badge bg-success px-3 py-2">
+                    <i class="fas fa-honey-pot me-1"></i>Madu AMAN
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card warning">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-honey"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Few Varroa</h5>
+                <p class="card-text small text-muted">Sedikit kutu Varroa & kumbang</p>
+                <span class="badge badge-honey text-dark px-3 py-2">
+                    <i class="fas fa-honey-pot me-1"></i>Madu HATI-HATI
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100 health-card danger">
+            <div class="card-body text-center p-4">
+                <div class="health-icon mb-3">
+                    <i class="fas fa-times-circle fa-3x text-danger"></i>
+                </div>
+                <h5 class="card-title fw-bold text-wood">Varroa Infected</h5>
+                <p class="card-text small text-muted">Terinfeksi kutu Varroa parah</p>
+                <span class="badge bg-danger px-3 py-2">
+                    <i class="fas fa-honey-pot me-1"></i>Madu TIDAK AMAN
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3 text-wood">
+                    <i class="fas fa-info-circle text-success me-2"></i>Tentang Sistem Ini
+                </h4>
+                <p class="text-muted">
+                    Sistem Deteksi Kesehatan Lebah Madu menggunakan teknologi 
+                    <strong class="text-wood">Convolutional Neural Network (CNN)</strong> untuk menganalisis 
+                    gambar lebah dan mendeteksi kondisi kesehatannya.
+                </p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Deteksi 6 jenis kondisi kesehatan</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Identifikasi jenis penyakit</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Rekomendasi pengobatan</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Status kelayakan madu</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Estimasi waktu panen</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3 text-wood">
+                    <i class="fas fa-lightbulb text-honey me-2"></i>Tips untuk Peternak
+                </h4>
+                <div class="tip-item mb-3 p-3 bg-cream rounded">
+                    <h6 class="fw-bold mb-2 text-wood">
+                        <i class="fas fa-search text-success me-2"></i>Inspeksi Rutin
+                    </h6>
+                    <p class="small text-muted mb-0">Periksa sarang minimal 2 minggu sekali untuk mendeteksi masalah sejak dini.</p>
+                </div>
+                <div class="tip-item mb-3 p-3 bg-cream rounded">
+                    <h6 class="fw-bold mb-2 text-wood">
+                        <i class="fas fa-camera text-success me-2"></i>Dokumentasikan
+                    </h6>
+                    <p class="small text-muted mb-0">Ambil foto lebah secara berkala untuk memantau perkembangan kesehatan.</p>
+                </div>
+                <div class="tip-item p-3 bg-cream rounded">
+                    <h6 class="fw-bold mb-2 text-wood">
+                        <i class="fas fa-book text-honey me-2"></i>Pelajari Gejala
+                    </h6>
+                    <p class="small text-muted mb-0">Kenali tanda-tanda penyakit lebah agar bisa ditangani dengan cepat.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card text-white border-0 shadow cta-card position-relative overflow-hidden">
+            <div class="cta-overlay"></div>
+            <div class="cta-honeycomb"></div>
+            <div class="card-body p-5 text-center position-relative" style="z-index: 2;">
+                <h3 class="fw-bold mb-3">
+                    <i class="fas fa-rocket me-2"></i>Siap Mencoba?
+                </h3>
+                <p class="mb-4">Mulai deteksi kesehatan lebah madu Anda sekarang!</p>
+                <a href="#upload-section" class="btn btn-light btn-lg px-5 py-3 rounded-pill">
+                    <i class="fas fa-play me-2"></i>Mulai Sekarang
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: url('https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?w=1200&q=80') center/cover no-repeat;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(26, 94, 42, 0.9) 0%, rgba(40, 167, 69, 0.85) 50%, rgba(218, 165, 32, 0.8) 100%);
+    z-index: 1;
+}
+
+.bee-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: 0;
+}
+
+.hero-section h1 {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-section .lead {
+    color: rgba(255,255,255,0.95);
+}
+
+.bee-animation {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+}
+
+.upload-area {
+    border: 3px dashed #daa520;
+    background: #fffdf7;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area:hover {
+    border-color: #28a745;
+    background: #f0fff4;
+}
+
+.upload-area.dragover {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.step-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(139, 69, 19, 0.15) !important;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #28a745, #daa520);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.health-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.health-card:hover {
+    transform: translateY(-5px);
+}
+
+.health-card.healthy:hover {
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3) !important;
+}
+
+.health-card.warning:hover {
+    box-shadow: 0 10px 30px rgba(218, 165, 32, 0.3) !important;
+}
+
+.health-card.danger:hover {
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3) !important;
+}
+
+.health-icon {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.upload-icon {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.cta-card {
+    background: url('https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=1200&q=80') center/cover no-repeat;
+    border-radius: 20px;
+}
+
+.cta-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.93) 0%, rgba(218, 165, 32, 0.9) 100%);
+    z-index: 1;
+}
+
+.cta-honeycomb {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: 0;
+}
+</style>
+
+<script>
+let uploadMode = 'single';
+
+function setMode(mode) {
+    uploadMode = mode;
+    const fileInput = document.getElementById('beeImage');
+    const singleBtn = document.getElementById('singleModeBtn');
+    const bulkBtn = document.getElementById('bulkModeBtn');
+    const helpText = document.getElementById('fileHelpText');
+
+    if (mode === 'bulk') {
+        fileInput.multiple = true;
+        singleBtn.classList.remove('active');
+        bulkBtn.classList.add('active');
+        helpText.textContent = 'Format: JPG, PNG (Maks. 20 file, max 5MB each)';
+    } else {
+        fileInput.multiple = false;
+        bulkBtn.classList.remove('active');
+        singleBtn.classList.add('active');
+        helpText.textContent = 'Format: JPG, PNG (Maks. 5MB)';
+    }
+    clearImage();
+}
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('beeImage');
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+});
+
+dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        if (uploadMode === 'single') {
+            showPreview(e.dataTransfer.files[0]);
+        } else {
+            showMultiPreview(e.dataTransfer.files);
+        }
+    }
+});
+
+fileInput.addEventListener('change', function(e) {
+    if (e.target.files.length > 0) {
+        if (uploadMode === 'single') {
+            showPreview(e.target.files[0]);
+        } else {
+            showMultiPreview(e.target.files);
+        }
+    }
+});
+
+function showPreview(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        document.getElementById('previewImg').src = event.target.result;
+        document.getElementById('uploadPrompt').style.display = 'none';
+        document.getElementById('imagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function showMultiPreview(files) {
+    let html = '<div class="text-center mb-3"><strong>' + files.length + ' file dipilih</strong></div><div class="d-flex flex-wrap justify-content-center gap-2">';
+    for (let i = 0; i < Math.min(files.length, 10); i++) {
+        const url = URL.createObjectURL(files[i]);
+        html += '<img src="' + url + '" class="rounded shadow-sm" style="width:80px;height:80px;object-fit:cover;border:2px solid #daa520;">';
+    }
+    if (files.length > 10) {
+        html += '<div class="d-flex align-items-center justify-content-center rounded shadow-sm bg-light" style="width:80px;height:80px;border:2px solid #daa520;"><strong>+' + (files.length - 10) + '</strong></div>';
+    }
+    html += '</div>';
+    document.getElementById('uploadPrompt').style.display = 'none';
+    document.getElementById('imagePreview').style.display = 'block';
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('previewImg').insertAdjacentHTML('afterend', '<div id="multiPreview">' + html + '</div>');
+}
+
+function clearImage() {
+    fileInput.value = '';
+    document.getElementById('uploadPrompt').style.display = 'block';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('previewImg').style.display = 'block';
+    const multiPrev = document.getElementById('multiPreview');
+    if (multiPrev) multiPrev.remove();
+}
+
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const formData = new FormData();
+    const fileInput = document.getElementById('beeImage');
+
+    if (!fileInput.files[0]) {
+        showError('Pilih gambar terlebih dahulu!');
+        return;
+    }
+
+    document.getElementById('predictBtn').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('errorAlert').style.display = 'none';
+
+    try {
+        if (uploadMode === 'bulk' && fileInput.files.length > 1) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('files', fileInput.files[i]);
+            }
+            const response = await fetch('/api/predict-bulk', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            showBulkResults(result);
+        } else {
+            formData.append('file', fileInput.files[0]);
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success && result.data.id) {
+                window.location.href = '/result/' + result.data.id;
+            } else if (result.success && result.data) {
+                showResult(result.data);
+            } else {
+                showError(result.error || 'Terjadi kesalahan');
+            }
+        }
+    } catch (error) {
+        showError('Error: ' + error.message);
+    } finally {
+        document.getElementById('predictBtn').style.display = 'block';
+        document.getElementById('loading').style.display = 'none';
+    }
+});
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorAlert');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('predictBtn').style.display = 'block';
+}
+
+function showBulkResults(result) {
+    document.getElementById('resultInline').style.display = 'block';
+    if (!result.results || result.results.length === 0) {
+        document.getElementById('resultInline').innerHTML = '<div class="alert alert-warning">Tidak ada hasil</div>';
+        return;
+    }
+
+    let html = '<div class="card border-0 shadow-lg"><div class="card-header text-white fw-bold p-3" style="background:linear-gradient(135deg,#28a745,#daa520)"><i class="fas fa-clipboard-check me-2"></i>Hasil Deteksi Massal - ' + result.total + ' Gambar</div><div class="card-body p-4"><div class="table-responsive"><table class="table table-hover"><thead><tr><th class="text-center">Gambar</th><th>Nama File</th><th>Kondisi</th><th>Confidence</th><th>Subspesies</th><th>Aksi</th></tr></thead><tbody>';
+
+    const statusColors = {healthy: '#28a745', warning: '#ffc107', danger: '#dc3545'};
+    const statusBadge = {healthy: 'success', warning: 'warning', danger: 'danger'};
+
+    result.results.forEach(function(item) {
+        if (item.success && item.data) {
+            const d = item.data;
+            const s = d.subspecies;
+            const h = d.health;
+            const st = h.status || 'healthy';
+            const b64 = d.image_base64 || '';
+            const imgTag = b64 ? '<img src="data:image/jpeg;base64,' + b64 + '" style="width:50px;height:50px;object-fit:cover;border:2px solid #daa520;border-radius:8px;">' : '<i class="fas fa-bee fa-2x text-honey"></i>';
+            html += '<tr><td class="text-center">' + imgTag + '</td><td>' + item.filename + '</td><td><span class="badge bg-' + statusBadge[st] + '">' + h.name + '</span></td><td>' + h.confidence + '%</td><td>' + s.name + '</td><td><a href="/result/' + d.id + '" class="btn btn-sm btn-outline-success"><i class="fas fa-eye"></i></a></td></tr>';
+        } else {
+            html += '<tr><td class="text-center"><i class="fas fa-times-circle text-danger"></i></td><td>' + item.filename + '</td><td colspan="4" class="text-danger">' + (item.error || 'Gagal') + '</td></tr>';
+        }
+    });
+
+    html += '</tbody></table></div><div class="text-center mt-3"><a href="/history" class="btn btn-honey"><i class="fas fa-history me-1"></i>Lihat Semua Riwayat</a></div></div></div>';
+    document.getElementById('resultInline').innerHTML = html;
+}
+
+function showResult(data) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('predictBtn').style.display = 'block';
+    document.getElementById('resultInline').style.display = 'block';
+
+    const h = data.health;
+    const s = data.subspecies;
+    const d = data.disease_info;
+
+    const statusColors = {healthy: '#28a745', warning: '#ffc107', danger: '#dc3545'};
+    const statusBadge = {healthy: 'success', warning: 'warning', danger: 'danger'};
+    const statusText = {healthy: 'SEHAT', warning: 'WASPADA', danger: 'BAHAYA'};
+
+    const status = h.status || 'healthy';
+
+    let gejalaHtml = '';
+    if (d.gejala) {
+        gejalaHtml = '<ul class="list-unstyled mb-0">' + d.gejala.map(g => '<li class="mb-1"><i class="fas fa-exclamation-circle text-warning me-2"></i>' + g + '</li>').join('') + '</ul>';
+    }
+
+    let pengobatanHtml = '';
+    if (d.pengobatan) {
+        pengobatanHtml = d.pengobatan.map(p => '<div class="mb-3"><h6 class="fw-bold text-wood"><i class="fas fa-medkit text-success me-2"></i>' + p.metode + '</h6><ol class="small">' + p.langkah.map(l => '<li class="mb-1">' + l + '</li>').join('') + '</ol></div>').join('');
+    }
+
+    let pencegahanHtml = '';
+    if (d.pencegahan) {
+        pencegahanHtml = '<ul class="list-unstyled small mb-0">' + d.pencegahan.map(p => '<li class="mb-1"><i class="fas fa-shield-alt text-success me-2"></i>' + p + '</li>').join('') + '</ul>';
+    }
+
+    let tipsHtml = '';
+    if (d.tips_panen) {
+        tipsHtml = '<ul class="list-unstyled small mb-0">' + d.tips_panen.map(t => '<li class="mb-1"><i class="fas fa-lightbulb text-honey me-2"></i>' + t + '</li>').join('') + '</ul>';
+    }
+
+    document.getElementById('resultInline').innerHTML = '<div class="card border-0 shadow-lg">' +
+        '<div class="card-header text-white fw-bold p-3" style="background:' + statusColors[status] + '">' +
+        '<i class="fas fa-clipboard-check me-2"></i>Hasil Deteksi - ' + statusText[status] + '</div>' +
+        '<div class="card-body p-4">' +
+        '<div class="row mb-4">' +
+        '<div class="col-md-6 mb-3"><div class="card h-100 border-0 bg-cream"><div class="card-body">' +
+        '<h6 class="fw-bold text-wood"><i class="fas fa-paw me-2 text-success"></i>Jenis Subspecies</h6>' +
+        '<h4 class="fw-bold mb-1">' + s.name + '</h4>' +
+        '<span class="badge bg-success">' + s.confidence + '% Confidence</span>' +
+        '</div></div></div>' +
+        '<div class="col-md-6 mb-3"><div class="card h-100 border-0 bg-cream"><div class="card-body">' +
+        '<h6 class="fw-bold text-wood"><i class="fas fa-heartbeat me-2 text-danger"></i>Kondisi Kesehatan</h6>' +
+        '<h4 class="fw-bold mb-1">' + h.name_id + '</h4>' +
+        '<span class="badge bg-' + statusBadge[status] + '">' + h.confidence + '% Confidence</span>' +
+        '</div></div></div>' +
+        '</div>' +
+        '<div class="alert mb-4" style="background:' + statusColors[status] + '20; border-left:4px solid ' + statusColors[status] + '">' +
+        '<i class="fas fa-info-circle me-2" style="color:' + statusColors[status] + '"></i>' + data.message + '</div>' +
+        '<div class="row">' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-notes-medical text-danger me-2"></i>Gejala</h5>' + gejalaHtml +
+        '</div></div></div>' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-medkit text-success me-2"></i>Pengobatan</h5>' + pengobatanHtml +
+        '</div></div></div>' +
+        '</div>' +
+        '<div class="row">' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-shield-alt text-success me-2"></i>Pencegahan</h5>' + pencegahanHtml +
+        '</div></div></div>' +
+        '<div class="col-md-6 mb-4"><div class="card h-100 border-0 shadow-sm"><div class="card-body">' +
+        '<h5 class="fw-bold text-wood mb-3"><i class="fas fa-honey-pot text-honey me-2"></i>Status Madu</h5>' +
+        '<div class="alert fw-bold mb-3" style="background:' + statusColors[status] + '20; border-left:4px solid ' + statusColors[status] + '">' + (d.madu_status || '') + '</div>' +
+        '<p class="small text-muted">' + (d.madu_info || '') + '</p>' +
+        '<h6 class="fw-bold text-wood mt-3"><i class="fas fa-clock me-2"></i>' + (d.estimasi_panen || '') + '</h6>' +
+        '</div></div></div>' +
+        '</div>' +
+        '</div></div>';
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
+{% endblock %}
