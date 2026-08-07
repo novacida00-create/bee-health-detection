@@ -35,6 +35,17 @@
                     <p class="text-muted">Pilih gambar lebah untuk dideteksi kondisinya</p>
                 </div>
 
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-honey active" id="singleModeBtn" onclick="setMode('single')">
+                            <i class="fas fa-image me-1"></i>1 Foto
+                        </button>
+                        <button type="button" class="btn btn-honey" id="bulkModeBtn" onclick="setMode('bulk')">
+                            <i class="fas fa-images me-1"></i>Banyak Foto
+                        </button>
+                    </div>
+                </div>
+
                 <form id="uploadForm" enctype="multipart/form-data">
                     <div class="upload-area p-4 rounded-3 text-center mb-4" id="dropZone">
                         <input type="file" class="d-none" id="beeImage" name="file" 
@@ -46,7 +57,7 @@
                             <button type="button" class="btn btn-honey btn-lg" onclick="document.getElementById('beeImage').click()">
                                 <i class="fas fa-folder-open me-2"></i>Pilih Gambar
                             </button>
-                            <p class="text-muted small mt-3 mb-0">Format: JPG, PNG (Maks. 5MB)</p>
+                            <p class="text-muted small mt-3 mb-0" id="fileHelpText">Format: JPG, PNG (Maks. 5MB)</p>
                         </div>
                         <div id="imagePreview" style="display: none;">
                             <img id="previewImg" src="#" alt="Preview" class="img-fluid rounded shadow mb-3" 
@@ -72,8 +83,8 @@
                     <div class="spinner-grow text-success" role="status" style="width: 4rem; height: 4rem;">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <h4 class="mt-4 fw-bold text-wood">Menganalisis Gambar...</h4>
-                    <p class="text-muted">Sistem sedang memproses gambar lebah Anda</p>
+                    <h4 class="mt-4 fw-bold text-wood" id="loadingText">Menganalisis Gambar...</h4>
+                    <p class="text-muted" id="loadingDesc">Sistem sedang memproses gambar lebah Anda</p>
                     <div class="progress mt-3" style="height: 8px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
                     </div>
@@ -391,6 +402,29 @@
 </style>
 
 <script>
+let uploadMode = 'single';
+
+function setMode(mode) {
+    uploadMode = mode;
+    const fileInput = document.getElementById('beeImage');
+    const singleBtn = document.getElementById('singleModeBtn');
+    const bulkBtn = document.getElementById('bulkModeBtn');
+    const helpText = document.getElementById('fileHelpText');
+
+    if (mode === 'bulk') {
+        fileInput.multiple = true;
+        singleBtn.classList.remove('active');
+        bulkBtn.classList.add('active');
+        helpText.textContent = 'Format: JPG, PNG (Maks. 20 file, max 5MB each)';
+    } else {
+        fileInput.multiple = false;
+        bulkBtn.classList.remove('active');
+        singleBtn.classList.add('active');
+        helpText.textContent = 'Format: JPG, PNG (Maks. 5MB)';
+    }
+    clearImage();
+}
+
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('beeImage');
 
@@ -410,13 +444,21 @@ dropZone.addEventListener('drop', (e) => {
     dropZone.classList.remove('dragover');
     if (e.dataTransfer.files.length) {
         fileInput.files = e.dataTransfer.files;
-        showPreview(e.dataTransfer.files[0]);
+        if (uploadMode === 'single') {
+            showPreview(e.dataTransfer.files[0]);
+        } else {
+            showMultiPreview(e.dataTransfer.files);
+        }
     }
 });
 
 fileInput.addEventListener('change', function(e) {
-    if (e.target.files[0]) {
-        showPreview(e.target.files[0]);
+    if (e.target.files.length > 0) {
+        if (uploadMode === 'single') {
+            showPreview(e.target.files[0]);
+        } else {
+            showMultiPreview(e.target.files);
+        }
     }
 });
 
@@ -430,10 +472,29 @@ function showPreview(file) {
     reader.readAsDataURL(file);
 }
 
+function showMultiPreview(files) {
+    let html = '<div class="text-center mb-3"><strong>' + files.length + ' file dipilih</strong></div><div class="d-flex flex-wrap justify-content-center gap-2">';
+    for (let i = 0; i < Math.min(files.length, 10); i++) {
+        const url = URL.createObjectURL(files[i]);
+        html += '<img src="' + url + '" class="rounded shadow-sm" style="width:80px;height:80px;object-fit:cover;border:2px solid #daa520;">';
+    }
+    if (files.length > 10) {
+        html += '<div class="d-flex align-items-center justify-content-center rounded shadow-sm bg-light" style="width:80px;height:80px;border:2px solid #daa520;"><strong>+' + (files.length - 10) + '</strong></div>';
+    }
+    html += '</div>';
+    document.getElementById('uploadPrompt').style.display = 'none';
+    document.getElementById('imagePreview').style.display = 'block';
+    document.getElementById('previewImg').style.display = 'none';
+    document.getElementById('previewImg').insertAdjacentHTML('afterend', '<div id="multiPreview">' + html + '</div>');
+}
+
 function clearImage() {
     fileInput.value = '';
     document.getElementById('uploadPrompt').style.display = 'block';
     document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('previewImg').style.display = 'block';
+    const multiPrev = document.getElementById('multiPreview');
+    if (multiPrev) multiPrev.remove();
 }
 
 document.getElementById('uploadForm').addEventListener('submit', async function(e) {
@@ -447,26 +508,35 @@ document.getElementById('uploadForm').addEventListener('submit', async function(
         return;
     }
 
-    formData.append('file', fileInput.files[0]);
-
     document.getElementById('predictBtn').style.display = 'none';
     document.getElementById('loading').style.display = 'block';
     document.getElementById('errorAlert').style.display = 'none';
 
     try {
-        const response = await fetch('/api/predict', {
-            method: 'POST',
-            body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.success && result.data.id) {
-            window.location.href = '/result/' + result.data.id;
-        } else if (result.success && result.data) {
-            showResult(result.data);
+        if (uploadMode === 'bulk' && fileInput.files.length > 1) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('files', fileInput.files[i]);
+            }
+            const response = await fetch('/api/predict-bulk', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            showBulkResults(result);
         } else {
-            showError(result.error || 'Terjadi kesalahan saat memproses gambar');
+            formData.append('file', fileInput.files[0]);
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success && result.data.id) {
+                window.location.href = '/result/' + result.data.id;
+            } else if (result.success && result.data) {
+                showResult(result.data);
+            } else {
+                showError(result.error || 'Terjadi kesalahan');
+            }
         }
     } catch (error) {
         showError('Error: ' + error.message);
@@ -482,6 +552,36 @@ function showError(message) {
     errorDiv.style.display = 'block';
     document.getElementById('loading').style.display = 'none';
     document.getElementById('predictBtn').style.display = 'block';
+}
+
+function showBulkResults(result) {
+    document.getElementById('resultInline').style.display = 'block';
+    if (!result.results || result.results.length === 0) {
+        document.getElementById('resultInline').innerHTML = '<div class="alert alert-warning">Tidak ada hasil</div>';
+        return;
+    }
+
+    let html = '<div class="card border-0 shadow-lg"><div class="card-header text-white fw-bold p-3" style="background:linear-gradient(135deg,#28a745,#daa520)"><i class="fas fa-clipboard-check me-2"></i>Hasil Deteksi Massal - ' + result.total + ' Gambar</div><div class="card-body p-4"><div class="table-responsive"><table class="table table-hover"><thead><tr><th class="text-center">Gambar</th><th>Nama File</th><th>Kondisi</th><th>Confidence</th><th>Subspesies</th><th>Aksi</th></tr></thead><tbody>';
+
+    const statusColors = {healthy: '#28a745', warning: '#ffc107', danger: '#dc3545'};
+    const statusBadge = {healthy: 'success', warning: 'warning', danger: 'danger'};
+
+    result.results.forEach(function(item) {
+        if (item.success && item.data) {
+            const d = item.data;
+            const s = d.subspecies;
+            const h = d.health;
+            const st = h.status || 'healthy';
+            const b64 = d.image_base64 || '';
+            const imgTag = b64 ? '<img src="data:image/jpeg;base64,' + b64 + '" style="width:50px;height:50px;object-fit:cover;border:2px solid #daa520;border-radius:8px;">' : '<i class="fas fa-bee fa-2x text-honey"></i>';
+            html += '<tr><td class="text-center">' + imgTag + '</td><td>' + item.filename + '</td><td><span class="badge bg-' + statusBadge[st] + '">' + h.name + '</span></td><td>' + h.confidence + '%</td><td>' + s.name + '</td><td><a href="/result/' + d.id + '" class="btn btn-sm btn-outline-success"><i class="fas fa-eye"></i></a></td></tr>';
+        } else {
+            html += '<tr><td class="text-center"><i class="fas fa-times-circle text-danger"></i></td><td>' + item.filename + '</td><td colspan="4" class="text-danger">' + (item.error || 'Gagal') + '</td></tr>';
+        }
+    });
+
+    html += '</tbody></table></div><div class="text-center mt-3"><a href="/history" class="btn btn-honey"><i class="fas fa-history me-1"></i>Lihat Semua Riwayat</a></div></div></div>';
+    document.getElementById('resultInline').innerHTML = html;
 }
 
 function showResult(data) {

@@ -2,6 +2,7 @@ import os
 import uuid
 import base64
 import tempfile
+from typing import List
 from fastapi import APIRouter, UploadFile, File, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -57,6 +58,53 @@ async def api_predict(file: UploadFile = File(...)):
     result["id"] = detection_id
     result["image_url"] = f"/static/uploads/{filename}"
     return {"success": True, "data": result}
+
+@router.post("/api/predict-bulk")
+async def api_predict_bulk(files: List[UploadFile] = File(...)):
+    results = []
+    from database.crud import init_db
+    init_db()
+
+    for file in files[:20]:
+        if not file.content_type.startswith("image/"):
+            results.append({"filename": file.filename, "success": False, "error": "Bukan gambar"})
+            continue
+
+        try:
+            contents = await file.read()
+            ext = os.path.splitext(file.filename)[1]
+            filename = f"{uuid.uuid4().hex}{ext}"
+
+            try:
+                filepath = os.path.join(UPLOAD_DIR, filename)
+                with open(filepath, "wb") as f:
+                    f.write(contents)
+            except Exception:
+                pass
+
+            image_b64 = base64.b64encode(contents).decode("utf-8")
+
+            from io import BytesIO
+            image_bytes = BytesIO(contents)
+            result = predict(image_bytes)
+
+            detection_id = save_detection(
+                image_filename=filename,
+                health_status=result["health"]["status"],
+                health_name=result["health"]["name"],
+                health_confidence=result["health"]["confidence"],
+                subspecies_name=result["subspecies"]["name"],
+                subspecies_confidence=result["subspecies"]["confidence"],
+                message=result["message"],
+                image_base64=image_b64
+            )
+
+            result["id"] = detection_id
+            results.append({"filename": file.filename, "success": True, "data": result})
+        except Exception as e:
+            results.append({"filename": file.filename, "success": False, "error": str(e)})
+
+    return {"success": True, "total": len(results), "results": results}
 
 @router.get("/predict-page", response_class=HTMLResponse)
 async def predict_page(request: Request):
