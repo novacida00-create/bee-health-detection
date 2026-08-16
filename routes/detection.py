@@ -38,6 +38,9 @@ async def api_predict(file: UploadFile = File(...)):
     image_bytes = BytesIO(contents)
     result = predict(image_bytes)
 
+    if result.get("is_not_bee"):
+        return {"success": False, "error": result["message"]}
+
     detection_id = None
     try:
         from database.crud import init_db
@@ -87,6 +90,10 @@ async def api_predict_bulk(files: List[UploadFile] = File(...)):
             from io import BytesIO
             image_bytes = BytesIO(contents)
             result = predict(image_bytes)
+
+            if result.get("is_not_bee"):
+                results.append({"filename": file.filename, "success": False, "error": result["message"]})
+                continue
 
             detection_id = save_detection(
                 image_filename=filename,

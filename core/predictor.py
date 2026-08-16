@@ -1,6 +1,6 @@
 import numpy as np
 from PIL import Image
-from config import IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS, CLASS_NAMES_SUBSPECIES, CLASS_NAMES_HEALTH
+from config import IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS, CLASS_NAMES_SUBSPECIES, CLASS_NAMES_HEALTH, CONFIDENCE_THRESHOLD
 from core.model_loader import get_model1, get_model2
 from core.disease_database import get_disease_info
 
@@ -32,19 +32,39 @@ def predict(image_bytes: bytes) -> dict:
     subspecies_confidence = float(pred_subspecies[0][subspecies_idx])
     health_confidence = float(pred_health[0][health_idx])
 
+    subspecies_conf_pct = round(subspecies_confidence * 100, 2)
+    health_conf_pct = round(health_confidence * 100, 2)
+
+    if subspecies_conf_pct < CONFIDENCE_THRESHOLD and health_conf_pct < CONFIDENCE_THRESHOLD:
+        return {
+            "is_not_bee": True,
+            "message": "Gambar ini bukan lebah. Silakan upload gambar lebah.",
+            "subspecies": {
+                "name": subspecies_name,
+                "confidence": subspecies_conf_pct,
+                "index": subspecies_idx
+            },
+            "health": {
+                "name": health_name,
+                "confidence": health_conf_pct,
+                "index": health_idx
+            }
+        }
+
     disease_info = get_disease_info(health_name)
 
     return {
+        "is_not_bee": False,
         "subspecies": {
             "name": subspecies_name,
-            "confidence": round(subspecies_confidence * 100, 2),
+            "confidence": subspecies_conf_pct,
             "index": subspecies_idx
         },
         "health": {
             "name": health_name,
             "name_id": disease_info.get("name_id", health_name),
             "status": disease_info.get("status", "healthy"),
-            "confidence": round(health_confidence * 100, 2),
+            "confidence": health_conf_pct,
             "index": health_idx
         },
         "disease_info": disease_info,
