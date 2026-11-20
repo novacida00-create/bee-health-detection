@@ -57,7 +57,7 @@ def predict(image_bytes: bytes) -> dict:
     ):
         return {
             "is_not_bee": True,
-            "message": "Gambar tidak terdeteksi sebagai lebah madu. Sistem hanya mendeteksi foto lebah madu yang jelas. Silakan upload gambar lebah madu.",
+            "message": "Gambar ditolak: tidak terdeteksi sebagai lebah madu yang jelas. Sistem hanya menerima foto lebah madu. Harap unggah foto lebah madu yang sesuai (objek lebah terlihat jelas, fokus, dan bukan gambar CCTV/benda lain).",
             "subspecies": {
                 "name": subspecies_name,
                 "confidence": subspecies_conf_pct,
