@@ -20,7 +20,13 @@ IMG_WIDTH = 100
 IMG_HEIGHT = 100
 IMG_CHANNELS = 3
 
-CONFIDENCE_THRESHOLD = 40.0
+# Minimum confidence (%) required from both models to accept a honey bee detection.
+# Images below this threshold or predicted as unknown ("-1") are rejected.
+CONFIDENCE_THRESHOLD = 75.0
+
+# Minimum gap (%) between the top-1 and top-2 predictions for each model.
+# A small gap indicates uncertainty and is treated as not a honey bee image.
+MARGIN_THRESHOLD = 20.0
 
 CLASS_NAMES_SUBSPECIES = [
     "-1",

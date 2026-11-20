@@ -1,6 +1,14 @@
 import numpy as np
 from PIL import Image
-from config import IMG_WIDTH, IMG_HEIGHT, IMG_CHANNELS, CLASS_NAMES_SUBSPECIES, CLASS_NAMES_HEALTH, CONFIDENCE_THRESHOLD
+from config import (
+    IMG_WIDTH,
+    IMG_HEIGHT,
+    IMG_CHANNELS,
+    CLASS_NAMES_SUBSPECIES,
+    CLASS_NAMES_HEALTH,
+    CONFIDENCE_THRESHOLD,
+    MARGIN_THRESHOLD,
+)
 from core.model_loader import get_model1, get_model2
 from core.disease_database import get_disease_info
 
@@ -35,10 +43,21 @@ def predict(image_bytes: bytes) -> dict:
     subspecies_conf_pct = round(subspecies_confidence * 100, 2)
     health_conf_pct = round(health_confidence * 100, 2)
 
-    if subspecies_conf_pct < CONFIDENCE_THRESHOLD and health_conf_pct < CONFIDENCE_THRESHOLD:
+    sub_sorted = np.sort(pred_subspecies[0])
+    health_sorted = np.sort(pred_health[0])
+    sub_margin_pct = round(float(sub_sorted[-1] - sub_sorted[-2]) * 100, 2) if sub_sorted.size > 1 else 100.0
+    health_margin_pct = round(float(health_sorted[-1] - health_sorted[-2]) * 100, 2) if health_sorted.size > 1 else 100.0
+
+    if (
+        subspecies_idx == 0
+        or subspecies_conf_pct < CONFIDENCE_THRESHOLD
+        or health_conf_pct < CONFIDENCE_THRESHOLD
+        or sub_margin_pct < MARGIN_THRESHOLD
+        or health_margin_pct < MARGIN_THRESHOLD
+    ):
         return {
             "is_not_bee": True,
-            "message": "Gambar ini bukan lebah. Silakan upload gambar lebah.",
+            "message": "Gambar tidak terdeteksi sebagai lebah madu. Sistem hanya mendeteksi foto lebah madu yang jelas. Silakan upload gambar lebah madu.",
             "subspecies": {
                 "name": subspecies_name,
                 "confidence": subspecies_conf_pct,
