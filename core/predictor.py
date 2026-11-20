@@ -48,12 +48,14 @@ def predict(image_bytes: bytes) -> dict:
     sub_margin_pct = round(float(sub_sorted[-1] - sub_sorted[-2]) * 100, 2) if sub_sorted.size > 1 else 100.0
     health_margin_pct = round(float(health_sorted[-1] - health_sorted[-2]) * 100, 2) if health_sorted.size > 1 else 100.0
 
+    # Gate primarily on subspecies identification to determine if image is a honey bee.
+    # Health confidence/margin can be lower for valid bee images, so only a minimal
+    # sanity check is applied to health to reduce obvious non-bee false accepts.
     if (
         subspecies_idx == 0
         or subspecies_conf_pct < CONFIDENCE_THRESHOLD
-        or health_conf_pct < CONFIDENCE_THRESHOLD
         or sub_margin_pct < MARGIN_THRESHOLD
-        or health_margin_pct < MARGIN_THRESHOLD
+        or health_conf_pct < 35.0
     ):
         return {
             "is_not_bee": True,
